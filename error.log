@@ -1,0 +1,65 @@
+Error: getblockchaininfo [] getaddrinfo ENOTFOUND http://127.0.0.1 
+Error: getbeaconcommitteestate [
+  null
+]  
+Error: getbeaconcommitteestate [
+  []
+]  
+Error: getbeaconcommitteestate [
+  [
+    "beaconcommittee"
+  ]
+]  
+Error: getbeaconcommitteestate [
+  [
+    "beaconcommittee"
+  ]
+]  
+Error: getbeaconcommitteestate [
+  [
+    "beaconcommittee"
+  ]
+]  
+Error: getbeaconcommitteestate [
+  [
+    "beaconcommittee"
+  ]
+]  
+Error: getbeaconcommitteestate [
+  [
+    "beaconcommittee"
+  ]
+]  
+Error: getbeaconcommitteestate [
+  "beaconcommittee"
+]  
+Error: getbeaconcommitteestate [
+  "beaconcommittee"
+]  
+Error: getbeaconcommitteestate [
+  0
+] connect ECONNREFUSED 127.0.0.1:20000 
+Error: getbeaconcommitteestate [
+  0
+] connect ECONNREFUSED 127.0.0.1:20000 
+Error: getbeaconcommitteestate [
+  0
+] connect ECONNREFUSED 127.0.0.1:20000 
+Error: getbeaconcommitteestate [
+  0
+] connect ECONNREFUSED 127.0.0.1:20000 
+Error: getbeaconcommitteestate [
+  0
+] connect ECONNREFUSED 127.0.0.1:20000 
+Error: getbeaconcommitteestate [
+  0
+] socket hang up 
+Error: getbeaconcommitteestate [
+  0
+] connect ECONNREFUSED 127.0.0.1:20000 
+Error: getbeaconcommitteestate [
+  0
+] connect ECONNREFUSED 127.0.0.1:20000 
+Error: getbeaconcommitteestate [
+  0
+] connect ECONNREFUSED 127.0.0.1:20000 
