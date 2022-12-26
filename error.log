@@ -63,3 +63,24 @@ Error: getbeaconcommitteestate [
 Error: getbeaconcommitteestate [
   0
 ] connect ECONNREFUSED 127.0.0.1:20000 
+Error: getbeaconcommitteestate [
+  0
+]  
+Error: getbeaconcommitteestate [
+  0
+]  
+Error: getbeaconcommitteestate [
+  0
+]  
+Error: getbeaconcommitteestate [
+  0
+]  
+Error: getbeaconcommitteestate [
+  0
+] connect ECONNREFUSED 127.0.0.1:20000 
+Error: getbeaconcommitteestate [
+  0
+] connect ECONNREFUSED 127.0.0.1:20000 
+Error: getbeaconcommitteestate [
+  0
+] connect ECONNREFUSED 127.0.0.1:20000 

@@ -31,12 +31,25 @@ exports = module.exports =  class Endpoint  {
             });
         });
     }
+
+    GetBeaconBestState(){
+        return this.requestRPC("GetBeaconBestState".toLowerCase())
+    }
+
     GetBeaconCommitteeState(height = 0) {
         return this.requestRPC('GetBeaconCommitteeState'.toLowerCase(),height);
     }
 
     GetBlockChainInfo(){
         return this.requestRPC('GetBlockChainInfo'.toLowerCase(), ...arguments);
+    }
+
+    GetBalanceByPrivatekey(privateKey){
+        return this.requestRPC('GetBalanceByPrivatekey'.toLowerCase(), ...arguments);
+    }
+
+    GetReward(privateKey){
+        return this.requestRPC('GetBalanceByPrivatekey'.toLowerCase(), ...arguments);
     }
 }
 

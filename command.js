@@ -1,8 +1,10 @@
 let Endpoint = require("./node")
 let beacon0 =  new Endpoint("127.0.0.1",20000)
-
+let {ImportKeyList} = require ("./utils")
+let keys = ImportKeyList()
 const CMD_LIST = {
     'show': {
+        "customkeys": showCustomKeyInfo,
         "beaconcommittee":showBeaconCommittee,
         "blockchaininfo":1
     },
@@ -66,6 +68,60 @@ async function showBlockChainInfo(){
     return str
 }
 
+~async function(){
+    console.log("1")
+    await showCustomKeyInfo()
+    console.log("2")
+}()
+
+function indexOfStr(s, list) {
+    for (let i =0; i < list.length; i++) {
+        if (s == list[i]) {
+            return i
+        }
+    }
+    return -1
+}
+async function showCustomKeyInfo(){
+    let beaconView = await beacon0.GetBeaconBestState()
+
+    for (let sid in Object.keys(beaconView["ShardCommittee"])){
+        if  (indexOfStr(beaconView["ShardCommittee"][sid]
+    }
+
+    for (let sid in Object.keys(beaconView["ShardPendingValidator"])){
+        beaconView["ShardCommittee"][sid]
+    }
+
+    for (let sid in Object.keys(beaconView["SyncingValidator"])){
+        beaconView["ShardCommittee"][sid]
+    }
+
+    for (let sid in Object.keys(beaconView["CandidateShardWaitingForCurrentRandom"])){
+        beaconView["ShardCommittee"][sid]
+    }
+
+    let BC = beaconView["BeaconCommittee"]
+    let BP = beaconView["BeaconPendingValidator"]
+    let BW = beaconView["BeaconWaiting"]
+    let BLP = beaconView["BeaconLocking"]
+
+    function KeyInfo(cpk, role, sid, balance, reward){
+        this.CPK = cpk.slice(cpk.length-6, cpk.length)
+        this.Role = role
+        this.Balance = balance
+        this.Reward = reward
+    }
+}
+
+async function getKeyBalance(privateKey) {
+
+}
+
+async function getKeyReward(paymentAddress) {
+
+}
+
 async function showBeaconCommittee(cmd){
     let res = await beacon0.GetBeaconCommitteeState(cmd[0])
     let jsonData = JSON.parse(res)
@@ -80,6 +136,7 @@ async function showBeaconCommittee(cmd){
         this.FinishSync = finishSync
         this.ShardActiveTime = activeTime
     }
+
     function LockingInfo(cpk, epoch, reason,releaseEpoch,releaseAmount){
         this.CPK = cpk.slice(cpk.length-6, cpk.length)
         this.Epoch = epoch
@@ -87,6 +144,7 @@ async function showBeaconCommittee(cmd){
         this.Release = releaseEpoch
         this.Amount = releaseAmount
     }
+
     let committes = []
     let pending = []
     let waiting = []
@@ -104,7 +162,7 @@ async function showBeaconCommittee(cmd){
         locking.push(new LockingInfo(info.CPK, info.LockingEpoch, info.LockingReason,info.ReleaseEpoch, info.ReleaseAmount))
     }
     let databcInfo = await showBlockChainInfo()
-    console.clear()
+    // console.clear()
     console.log(databcInfo)
     if (committes.length > 0) {
         console.log("Committee");
