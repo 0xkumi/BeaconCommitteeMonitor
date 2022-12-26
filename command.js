@@ -69,34 +69,39 @@ async function showBlockChainInfo(){
 async function showBeaconCommittee(cmd){
     let res = await beacon0.GetBeaconCommitteeState(cmd[0])
     let jsonData = JSON.parse(res)
-    function StakerInfo(cpk, stakingamount, unstake, perforamnce, epochScore, fixnode){
+    function StakerInfo(cpk, stakingamount, unstake, perforamnce, epochScore, fixnode,finishSync,activeTime){
         this.CPK = cpk.slice(cpk.length-6, cpk.length)
         this.StakingAmount = stakingamount
         this.Unstake = unstake
         this.Performance = perforamnce
         this.Score = epochScore
-        this.fixedNode = fixnode
+        this.FixedNode = fixnode
+        this.Score = epochScore
+        this.FinishSync = finishSync
+        this.ShardActiveTime = activeTime
     }
-    function LockingInfo(cpk, epoch, reason){
+    function LockingInfo(cpk, epoch, reason,releaseEpoch,releaseAmount){
         this.CPK = cpk.slice(cpk.length-6, cpk.length)
         this.Epoch = epoch
         this.Reason = reason
+        this.Release = releaseEpoch
+        this.Amount = releaseAmount
     }
     let committes = []
     let pending = []
     let waiting = []
     let locking = []
     for (let info of jsonData["Committee"]) {
-        committes.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode))
+        committes.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode,info.FinishSync,info.ShardActiveTime))
     }
     for (let info of jsonData["Pending"]) {
-        pending.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode))
+        pending.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode,info.FinishSync,info.ShardActiveTime))
     }
     for (let info of jsonData["Waiting"]) {
-        waiting.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode))
+        waiting.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode,info.FinishSync,info.ShardActiveTime))
     }
     for (let info of jsonData["Locking"]) {
-        locking.push(new LockingInfo(info.CPK, info.LockingEpoch, info.LockingReason))
+        locking.push(new LockingInfo(info.CPK, info.LockingEpoch, info.LockingReason,info.ReleaseEpoch, info.ReleaseAmount))
     }
     let databcInfo = await showBlockChainInfo()
     console.clear()
