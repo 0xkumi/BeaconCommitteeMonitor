@@ -1,7 +1,7 @@
 // nodejs
 const Jayson = require('jayson');
 
-exports = module.exports =  class Endpoint  {
+exports = module.exports = class Endpoint {
     rpcClient;
 
     constructor(host, rpcPort) {
@@ -15,7 +15,7 @@ exports = module.exports =  class Endpoint  {
         // console.log(method, params);
         return new Promise((resolve, reject) => {
             this.rpcClient.request(method, params, function (err, response) {
-                
+
                 if (err || response.Error) {
                     require('fs').appendFileSync(
                         './error.log',
@@ -32,24 +32,25 @@ exports = module.exports =  class Endpoint  {
         });
     }
 
-    GetBeaconBestState(){
+    GetBeaconBestState() {
         return this.requestRPC("GetBeaconBestState".toLowerCase())
     }
 
     GetBeaconCommitteeState(height = 0) {
-        return this.requestRPC('GetBeaconCommitteeState'.toLowerCase(),height);
+        return this.requestRPC('GetBeaconCommitteeState'.toLowerCase(), height);
     }
 
-    GetBlockChainInfo(){
+    GetBlockChainInfo() {
         return this.requestRPC('GetBlockChainInfo'.toLowerCase(), ...arguments);
     }
 
-    GetBalanceByPrivatekey(privateKey){
+    GetBalanceByPrivatekey(privateKey) {
         return this.requestRPC('GetBalanceByPrivatekey'.toLowerCase(), ...arguments);
     }
 
-    GetReward(privateKey){
-        return this.requestRPC('GetBalanceByPrivatekey'.toLowerCase(), ...arguments);
+    GetRewardAmount(payment) {
+        return this.requestRPC('GetRewardAmount'.toLowerCase(), ...arguments);
     }
+
 }
 

@@ -1,16 +1,18 @@
 let Endpoint = require("./node")
-let beacon0 =  new Endpoint("127.0.0.1",20000)
-let {ImportKeyList} = require ("./utils")
-let keys = ImportKeyList()
+let beacon0 = new Endpoint("127.0.0.1", 20004)
+let {ImportKeyList} = require("./utils")
+let keysObj = ImportKeyList()
+let keys = Object.keys(keysObj)
+
 const CMD_LIST = {
     'show': {
         "customkeys": showCustomKeyInfo,
-        "beaconcommittee":showBeaconCommittee,
-        "blockchaininfo":1
+        "beaconcommittee": showBeaconCommittee,
+        "blockchaininfo": 1
     },
-    'stake':{},
-    'addstake':{},
-    'unstake':{},
+    'stake': {},
+    'addstake': {},
+    'unstake': {},
 }
 
 function hint(...cmd) {
@@ -38,11 +40,11 @@ async function run(...cmd) {
         if (cmdLevel[cmd[index]] != null) {
             if (typeof cmdLevel[cmd[index]] == "function") {
                 var fd = cmdLevel[cmd[index]]
-                await fd(cmd.slice(index+1, cmd.length ))
+                await fd(cmd.slice(index + 1, cmd.length))
                 break
-            } else{
-                    cmdLevel = CMD_LIST[cmd[index]]
-                    index++
+            } else {
+                cmdLevel = CMD_LIST[cmd[index]]
+                index++
             }
         } else {
             console.log(index, cmd[index], typeof CMD_LIST[cmd[index]])
@@ -56,7 +58,7 @@ exports = module.exports = {
     run: run
 }
 
-async function showBlockChainInfo(){
+async function showBlockChainInfo() {
     let blockchainInfo = await beacon0.GetBlockChainInfo()
     let str = `Epoch: ${blockchainInfo["BestBlocks"]["-1"].Epoch} - `
     str += `Beacon: ${blockchainInfo["BestBlocks"]["-1"].Height}, `
@@ -68,65 +70,170 @@ async function showBlockChainInfo(){
     return str
 }
 
-~async function(){
-    console.log("1")
-    await showCustomKeyInfo()
-    console.log("2")
-}()
 
 function indexOfStr(s, list) {
-    for (let i =0; i < list.length; i++) {
+    for (let i = 0; i < list.length; i++) {
         if (s == list[i]) {
             return i
         }
     }
     return -1
 }
-async function showCustomKeyInfo(){
+
+async function showCustomKeyInfo() {
     let beaconView = await beacon0.GetBeaconBestState()
+    console.log(beaconView.TriggerFeature)
+    let customKey = {}
 
-    for (let sid in Object.keys(beaconView["ShardCommittee"])){
-        if  (indexOfStr(beaconView["ShardCommittee"][sid]
+    for (let sid of Object.keys(beaconView["ShardCommittee"])) {
+        for (let k of keys) {
+            let offset = indexOfStr(k, beaconView["ShardCommittee"][sid])
+            if (offset !== -1) {
+                if (customKey[k] == null) customKey[k] = {}
+                customKey[k].shard = {
+                    sid: sid,
+                    role: "Committee",
+                    offset: offset,
+                    queueLength: beaconView["ShardCommittee"][sid].length,
+                }
+            }
+        }
     }
 
-    for (let sid in Object.keys(beaconView["ShardPendingValidator"])){
-        beaconView["ShardCommittee"][sid]
+    for (let sid of Object.keys(beaconView["ShardPendingValidator"])) {
+        for (let k of keys) {
+            let offset = indexOfStr(k, beaconView["ShardPendingValidator"][sid])
+            if (offset !== -1) {
+                if (customKey[k] == null) customKey[k] = {}
+                customKey[k].shard = {
+                    sid: sid,
+                    role: "Pending",
+                    offset: offset,
+                    queueLength: beaconView["ShardPendingValidator"][sid].length,
+                }
+
+            }
+        }
     }
 
-    for (let sid in Object.keys(beaconView["SyncingValidator"])){
-        beaconView["ShardCommittee"][sid]
+    for (let sid in Object.keys(beaconView["SyncingValidator"])) {
+        for (let k of keys) {
+            let offset = indexOfStr(k, beaconView["SyncingValidator"][sid])
+            if (offset !== -1) {
+                if (customKey[k] == null) customKey[k] = {}
+                customKey[k].shard = {
+                    sid: sid,
+                    role: "Syncing",
+                }
+            }
+        }
     }
 
-    for (let sid in Object.keys(beaconView["CandidateShardWaitingForCurrentRandom"])){
-        beaconView["ShardCommittee"][sid]
+    for (let k of keys) {
+        // console.log("k", k)
+        let offset = indexOfStr(k, beaconView["CandidateShardWaitingForNextRandom"])
+        if (offset !== -1) {
+            if (customKey[k] == null) customKey[k] = {}
+            customKey[k].shard = {
+                role: "Assigning",
+            }
+        }
     }
 
-    let BC = beaconView["BeaconCommittee"]
-    let BP = beaconView["BeaconPendingValidator"]
-    let BW = beaconView["BeaconWaiting"]
-    let BLP = beaconView["BeaconLocking"]
+    for (let k of keys) {
+        let offset = indexOfStr(k, beaconView["BeaconCommittee"])
+        if (offset !== -1) {
+            if (customKey[k] == null) customKey[k] = {}
+            customKey[k].beacon = {
+                role: "Committee",
+                offset: offset,
+                queueLength: beaconView["BeaconCommittee"].length,
+            }
+        }
+    }
 
-    function KeyInfo(cpk, role, sid, balance, reward){
-        this.CPK = cpk.slice(cpk.length-6, cpk.length)
-        this.Role = role
+    for (let k of keys) {
+        let offset = indexOfStr(k, beaconView["BeaconPendingValidator"])
+        if (offset !== -1) {
+            if (customKey[k] == null) customKey[k] = {}
+            customKey[k].beacon = {
+                role: "Pending",
+                offset: offset,
+                queueLength: beaconView["BeaconPendingValidator"].length,
+            }
+        }
+    }
+
+
+    for (let k of keys) {
+        let offset = indexOfStr(k, beaconView["BeaconWaiting"])
+        if (offset !== -1) {
+            if (customKey[k] == null) customKey[k] = {}
+            customKey[k].beacon = {
+                role: "Waiting",
+                offset: offset,
+                queueLength: beaconView["BeaconWaiting"].length,
+            }
+        }
+    }
+
+    for (let k of keys) {
+        let offset = indexOfStr(k, beaconView["BeaconLocking"])
+        if (offset !== -1) {
+            if (customKey[k] == null) customKey[k] = {}
+            customKey[k].beacon = {
+                role: "Locking",
+                offset: offset,
+                queueLength: beaconView["BeaconLocking"].length,
+            }
+        }
+    }
+
+    function KeyInfo(cpk, beacon, shard, balance, reward) {
+        this.CPK = cpk.slice(cpk.length - 6, cpk.length)
+        this.Beacon = beacon ? beacon.role : ""
+        this.Shard = shard ? (shard.role + " " + (shard.sid || "")).trim() : ""
         this.Balance = balance
         this.Reward = reward
     }
+
+    let showInfo = []
+    let balanceProcess = []
+    let rewardProcess = []
+    for (let key of Object.keys(customKey)) {
+        showInfo.push(new KeyInfo(key, customKey[key].beacon, customKey[key].shard, 0, 0))
+        balanceProcess.push(getKeyBalance(keysObj[key].PrivateKey))
+        rewardProcess.push(getRewardAmount(keysObj[key].PaymentAddress))
+
+    }
+
+    let balances = await Promise.all(balanceProcess)
+    let rewards = await Promise.all(rewardProcess)
+
+    for (let i = 0; i < showInfo.length; i++) {
+        showInfo[i].Balance = balances[i]
+        showInfo[i].Reward = rewards[i]
+    }
+    return showInfo
+}
+
+async function getRewardAmount(paymentAdd) {
+    let res = await beacon0.GetRewardAmount(paymentAdd)
+    return res
 }
 
 async function getKeyBalance(privateKey) {
-
+    let res = await beacon0.GetBalanceByPrivatekey(privateKey)
+    return res
 }
 
-async function getKeyReward(paymentAddress) {
 
-}
-
-async function showBeaconCommittee(cmd){
+async function showBeaconCommittee(cmd) {
     let res = await beacon0.GetBeaconCommitteeState(cmd[0])
     let jsonData = JSON.parse(res)
-    function StakerInfo(cpk, stakingamount, unstake, perforamnce, epochScore, fixnode,finishSync,activeTime){
-        this.CPK = cpk.slice(cpk.length-6, cpk.length)
+
+    function StakerInfo(cpk, stakingamount, unstake, perforamnce, epochScore, fixnode, finishSync, activeTime) {
+        this.CPK = cpk.slice(cpk.length - 6, cpk.length)
         this.StakingAmount = stakingamount
         this.Unstake = unstake
         this.Performance = perforamnce
@@ -137,8 +244,8 @@ async function showBeaconCommittee(cmd){
         this.ShardActiveTime = activeTime
     }
 
-    function LockingInfo(cpk, epoch, reason,releaseEpoch,releaseAmount){
-        this.CPK = cpk.slice(cpk.length-6, cpk.length)
+    function LockingInfo(cpk, epoch, reason, releaseEpoch, releaseAmount) {
+        this.CPK = cpk.slice(cpk.length - 6, cpk.length)
         this.Epoch = epoch
         this.Reason = reason
         this.Release = releaseEpoch
@@ -150,20 +257,22 @@ async function showBeaconCommittee(cmd){
     let waiting = []
     let locking = []
     for (let info of jsonData["Committee"]) {
-        committes.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode,info.FinishSync,info.ShardActiveTime))
+        committes.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode, info.FinishSync, info.ShardActiveTime))
     }
     for (let info of jsonData["Pending"]) {
-        pending.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode,info.FinishSync,info.ShardActiveTime))
+        pending.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode, info.FinishSync, info.ShardActiveTime))
     }
     for (let info of jsonData["Waiting"]) {
-        waiting.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode,info.FinishSync,info.ShardActiveTime))
+        waiting.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode, info.FinishSync, info.ShardActiveTime))
     }
     for (let info of jsonData["Locking"]) {
-        locking.push(new LockingInfo(info.CPK, info.LockingEpoch, info.LockingReason,info.ReleaseEpoch, info.ReleaseAmount))
+        locking.push(new LockingInfo(info.CPK, info.LockingEpoch, info.LockingReason, info.ReleaseEpoch, info.ReleaseAmount))
     }
     let databcInfo = await showBlockChainInfo()
-    // console.clear()
+    let customKeyInfo = await showCustomKeyInfo()
+    console.clear()
     console.log(databcInfo)
+
     if (committes.length > 0) {
         console.log("Committee");
         console.table(committes);
@@ -179,5 +288,10 @@ async function showBeaconCommittee(cmd){
     if (locking.length > 0) {
         console.log("Locking");
         console.table(locking);
+    }
+
+    if (customKeyInfo.length > 0) {
+        console.log("Custom Key Info:");
+        console.table(customKeyInfo);
     }
 }
