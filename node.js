@@ -52,5 +52,9 @@ exports = module.exports = class Endpoint {
         return this.requestRPC('GetRewardAmount'.toLowerCase(), ...arguments);
     }
 
+    GetBeaconStakerInfo(height, pk) {
+        return this.requestRPC('getbeaconstaker'.toLowerCase(), ...arguments);
+    }
+
 }
 

@@ -82,7 +82,6 @@ function indexOfStr(s, list) {
 
 async function showCustomKeyInfo() {
     let beaconView = await beacon0.GetBeaconBestState()
-    console.log(beaconView.TriggerFeature)
     let customKey = {}
 
     for (let sid of Object.keys(beaconView["ShardCommittee"])) {
@@ -227,10 +226,8 @@ async function getKeyBalance(privateKey) {
     return res
 }
 
-
 async function showBeaconCommittee(cmd) {
-    let res = await beacon0.GetBeaconCommitteeState(cmd[0])
-    let jsonData = JSON.parse(res)
+    let jsonData = await beacon0.GetBeaconCommitteeState(cmd[0])
 
     function StakerInfo(cpk, stakingamount, unstake, perforamnce, epochScore, fixnode, finishSync, activeTime) {
         this.CPK = cpk.slice(cpk.length - 6, cpk.length)
@@ -257,9 +254,18 @@ async function showBeaconCommittee(cmd) {
     let waiting = []
     let locking = []
     for (let info of jsonData["Committee"]) {
+        if (!info.FixedNode) {
+            let res = await beacon0.GetBeaconStakerInfo(331, info.CPK)
+            console.log(info.CPK, res)
+        }
         committes.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode, info.FinishSync, info.ShardActiveTime))
     }
+
     for (let info of jsonData["Pending"]) {
+        if (!info.FixedNode) {
+            let res = await beacon0.GetBeaconStakerInfo(331, info.CPK)
+            console.log(info.CPK, res)
+        }
         pending.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode, info.FinishSync, info.ShardActiveTime))
     }
     for (let info of jsonData["Waiting"]) {
@@ -268,6 +274,7 @@ async function showBeaconCommittee(cmd) {
     for (let info of jsonData["Locking"]) {
         locking.push(new LockingInfo(info.CPK, info.LockingEpoch, info.LockingReason, info.ReleaseEpoch, info.ReleaseAmount))
     }
+    return
     let databcInfo = await showBlockChainInfo()
     let customKeyInfo = await showCustomKeyInfo()
     console.clear()
