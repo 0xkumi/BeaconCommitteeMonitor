@@ -4,6 +4,18 @@ let {ImportKeyList} = require("./utils")
 let keysObj = ImportKeyList()
 let keys = Object.keys(keysObj)
 
+// const k1 = "121VhftSAygpEJZ6i9jGkKtxHyWvAmXSDFvEXCQJxEg6VeaqPhramr3fkdssxs696jRR5RHcvW2KMkjvKUJudW9oXfkDvwYgpB2n2HrPkWD4tMUEbHXejqjbKQP5h1igfSV9DYwxRyc4tUiS6XkVZ5CTfPPevWJ4mXrnJ1iehxbbeSm9WBJG8nRhXFgm6Phh53Y61fGoVcbKYuUDmpFisuRmmcQgCbAFqdsH8A8wJQ5tqK2EQuwRjNL4cVx3tAqceVEHqmSMMdrjQMBT1S3W62ksdbgp6cPKe1KDvbRdJmEq32e4jgdxPCHwRpagvRahYNjtHQc1wiZRLQtKR4HA4vX98FK3rj1suDcxZpK7vGqVVQqPuw5eyjf5oJFgfD7mUg4BUzTCaMeDVTFdyTH9vU9mmyQ7eadouH58zvyeh6nHeE4v"
+// const k2 = "121VhftSAygpEJZ6i9jGk6RCxhXW1MRWn8T97YNsgHHg2vzVhWQa1t4pSYKSb1PNYSmpWkb59FF6MRutDvaeU4Sdgkuz9Vmfy3x5TbbKL1Fm6N7eYz2S7VfQv6L5Qo5p8dCNEH8U58sTNA4kR8CReFBFZ8cZiNgk5z1mWB5ujzRoAoca2PfpzAtbrwCfzoifXD9KWwjbz6e7s621kd3vf4oqJPKySmsnUwh6f3ACNMepLVJj7G7QLtGrzoPPn2BgemEFdHomaSmeWp4eX5NpTvXZ8pzX6rLcJcjPnw1bqEwyH1iUZFJCdZ18UtnHs45GxnifrQFxmUNFvoEJJMBB7GqHP4Mm9xuMA3i92gkwkz5oQHTr7TgmdUpjGjvF7aRB1oEePEBQ1QLmvQpGpWZ5UYRBHTifFyL9J9BivC7XKQxE8iSz"
+
+// ~async function(){
+//     let res1 = await beacon3.GetBeaconStakerInfo(5616, k1)
+//     console.log(res1)
+
+//     let res2 = await beacon3.GetBeaconStakerInfo(5616, k2)
+//     console.log(res2)
+// }()
+
+
 const CMD_LIST = {
     'show': {
         "customkeys": showCustomKeyInfo,
@@ -58,8 +70,8 @@ exports = module.exports = {
     run: run
 }
 
-async function showBlockChainInfo() {
-    let blockchainInfo = await beacon0.GetBlockChainInfo()
+async function showBlockChainInfo(blockchainInfo) {
+
     let str = `Epoch: ${blockchainInfo["BestBlocks"]["-1"].Epoch} - `
     str += `Beacon: ${blockchainInfo["BestBlocks"]["-1"].Height}, `
     for (let v of Object.keys(blockchainInfo["BestBlocks"])) {
@@ -115,7 +127,7 @@ async function showCustomKeyInfo() {
         }
     }
 
-    for (let sid in Object.keys(beaconView["SyncingValidator"])) {
+    for (let sid of Object.keys(beaconView["SyncingValidator"])) {
         for (let k of keys) {
             let offset = indexOfStr(k, beaconView["SyncingValidator"][sid])
             if (offset !== -1) {
@@ -249,33 +261,27 @@ async function showBeaconCommittee(cmd) {
         this.Amount = releaseAmount
     }
 
+    let blockchainInfo = await beacon0.GetBlockChainInfo()
+    let databcInfo = await showBlockChainInfo(blockchainInfo)
     let committes = []
     let pending = []
     let waiting = []
     let locking = []
     for (let info of jsonData["Committee"]) {
-        if (!info.FixedNode) {
-            let res = await beacon0.GetBeaconStakerInfo(331, info.CPK)
-            console.log(info.CPK, res)
-        }
         committes.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode, info.FinishSync, info.ShardActiveTime))
     }
 
     for (let info of jsonData["Pending"]) {
-        if (!info.FixedNode) {
-            let res = await beacon0.GetBeaconStakerInfo(331, info.CPK)
-            console.log(info.CPK, res)
-        }
         pending.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode, info.FinishSync, info.ShardActiveTime))
     }
+
     for (let info of jsonData["Waiting"]) {
         waiting.push(new StakerInfo(info.CPK, info.StakingAmount, info.Unstake, info.Performance, info.EpochScore, info.FixedNode, info.FinishSync, info.ShardActiveTime))
     }
     for (let info of jsonData["Locking"]) {
         locking.push(new LockingInfo(info.CPK, info.LockingEpoch, info.LockingReason, info.ReleaseEpoch, info.ReleaseAmount))
     }
-    return
-    let databcInfo = await showBlockChainInfo()
+
     let customKeyInfo = await showCustomKeyInfo()
     console.clear()
     console.log(databcInfo)
